@@ -5,18 +5,14 @@ from ultralytics import YOLO
 import tempfile
 import os
 
-# -------------------------------------------------
 # BASIC PAGE SETTINGS
-# -------------------------------------------------
 st.set_page_config(
     page_title="Crowd Detection Admin",
     page_icon="👮",
     layout="wide"
 )
 
-# -------------------------------------------------
-# LOAD YOLO MODEL (once, cached)
-# -------------------------------------------------
+# LOAD YOLo
 @st.cache_resource
 def load_model():
     model = YOLO("yolov8n.pt")
@@ -24,15 +20,11 @@ def load_model():
 
 model = load_model()
 
-# -------------------------------------------------
 # SESSION STATE FOR LOGIN
-# -------------------------------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-# -------------------------------------------------
 # LOGIN PAGE
-# -------------------------------------------------
 def login_page():
     st.markdown("## 👮 Admin Login")
 
@@ -49,9 +41,7 @@ def login_page():
             else:
                 st.error("Invalid username or password. Try again.")
 
-# -------------------------------------------------
 # CROWD DETECTION FUNCTIONS
-# -------------------------------------------------
 def detect_people_on_image(image: np.ndarray):
     """
     Runs YOLO on an RGB image and returns:
@@ -82,9 +72,7 @@ def detect_people_on_image(image: np.ndarray):
 
     return image, person_count
 
-# -------------------------------------------------
 # DASHBOARD PAGE
-# -------------------------------------------------
 def dashboard_page():
     st.sidebar.title("👮 Admin Panel")
     st.sidebar.success("Logged in as: admin")
@@ -107,7 +95,7 @@ def dashboard_page():
 
     tabs = st.tabs(["🖼 Image Detection", "🎥 Video Detection", "📡 Live Camera"])
 
-    # ---------------- IMAGE TAB ----------------
+    #IMAGE TAB ----------------
     with tabs[0]:
         st.subheader("Upload an Image")
 
@@ -139,7 +127,7 @@ def dashboard_page():
                         f"is above threshold ({threshold})."
                     )
 
-                    # ---------- Waiting time block ----------
+                    #  Waiting time block ---
                     extra_people = person_count - threshold
                     minutes_per_person = 2
                     wait_time = max(1, extra_people * minutes_per_person)
@@ -149,14 +137,14 @@ def dashboard_page():
                         f"Estimated waiting time is about **{wait_time} minutes**.\n"
                         f"Please come after **{wait_time} minutes** for a freer area."
                     )
-                    # ---------------------------------------
+                   
                 else:
                     st.info(
                         f"✅ Safe Crowd Level. People count ({person_count}) "
                         f"is below threshold ({threshold})."
                     )
 
-    # ---------------- VIDEO TAB ----------------
+    #  VIDEO TAB ---
     with tabs[1]:
         st.subheader("Upload a Video")
 
@@ -224,7 +212,7 @@ def dashboard_page():
                     f"is below threshold ({threshold})."
                 )
 
-    # ---------------- LIVE CAMERA TAB ----------------
+    #   LIVE CAMERA TAB ---
     with tabs[2]:
         st.subheader("Live Crowd Detection (Webcam)")
 
@@ -279,11 +267,8 @@ def dashboard_page():
             video_processor_factory=VideoProcessor,
             media_stream_constraints={"video": True, "audio": False},
         )
-
-# -------------------------------------------------
-# ROUTING
-# -------------------------------------------------
 if st.session_state.logged_in:
     dashboard_page()
 else:
+
     login_page()
